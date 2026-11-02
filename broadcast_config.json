@@ -2,100 +2,76 @@
   "streams": [
     {
       "name": "Канал 1",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cpu",
-      "quality": "light"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid",
+      "min_kbps": 100,
+      "warn_kbps": 2500
     },
     {
       "name": "Канал 2",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cpu",
-      "quality": "smooth"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid"
     },
     {
       "name": "Канал 3",
       "url": "http://95.67.12.189:10067",
-      "decoder": "cpu",
-      "quality": "full"
+      "decoder": "cuvid"
     },
     {
       "name": "Канал 4",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cuda",
-      "quality": "light"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid"
     },
     {
       "name": "Канал 5",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cuda",
-      "quality": "smooth"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid"
     },
     {
-      "name": "Канал 3",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cuda",
-      "quality": "full"
+      "name": "Канал 6",
+      "url": "http://95.67.12.189:9017"
     },
     {
-      "name": "Канал 3",
-      "url": "http://95.67.12.189:10067",
-      "quality": "light"
+      "name": "Канал 7",
+      "url": "http://95.67.12.189:9017"
     },
     {
-      "name": "Канал 3",
-      "url": "http://95.67.12.189:10067",
-      "quality": "light"
+      "name": "Канал 8",
+      "url": "http://95.67.12.189:9017"
     },
     {
-      "name": "Канал 3",
-      "url": "http://95.67.12.189:10067",
-      "quality": "light"
+      "name": "Канал 9",
+      "url": "http://95.67.12.189:9017"
     },
     {
       "name": "Канал 10",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 11",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 12",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 13",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 14",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 15",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 16",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 17",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 18",
-      "url": "http://95.67.12.189:10067"
-    },
-    {
-      "name": "Канал 19",
-      "url": "http://95.67.12.189:10067",
-      "decoder": "cuda",
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid",
       "quality": "full"
     },
     {
-      "name": "Канал 20",
-      "url": "http://95.67.12.189:10067"
+      "name": "Канал 11",
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid",
+      "quality": "full"
+    },
+    {
+      "name": "Канал 12",
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuvid",
+      "quality": "full"
+    },
+    {
+      "name": "Канал 13",
+      "url": "http://95.67.12.189:9017"
+    },
+    {
+      "name": "Канал 14",
+      "url": "http://95.67.12.189:9017"
+    },
+    {
+      "name": "Канал 15",
+      "url": "http://95.67.12.189:9017"
     }
   ],
   "defaults": {

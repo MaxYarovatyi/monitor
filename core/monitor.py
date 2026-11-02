@@ -131,9 +131,11 @@ class Monitor:
 
         from analyzers.video import VideoAnalyzer
         va = VideoAnalyzer()
-                
+        n=[0]       
         def on_frame(d):
-            st.on_video(*va.process(d))
+            n[0]+=1
+            if n[0]%3 == 0:    
+                st.on_video(*va.process(d))
             bus.publish("frame", cid, d)
 
         def on_status(s):

@@ -5,6 +5,7 @@ import socket
 import subprocess
 import threading
 import time
+import os
 
 import numpy as np
 
@@ -38,18 +39,16 @@ def _kill_tree(p):
     if p.poll() is not None:
         return
     try:
-        subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)],
-                       capture_output=True,
-                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW",0))
-    except Exception:
-        pass
-    try:
         p.kill()
     except Exception:
         pass
+    if Path(FFMPEG).parent.name != "ffmpeg":     # shim Chocolatey: потрібне вбивство дерева
+           subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)],
+                          capture_output=True,
+                          creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
 
 def build_cmd(url, mode, audio_port=None, tap_port=None, quality="full"):
-    cmd = [FFMPEG, "-hide_banner", "-loglevel", "error", "-nostdin"]
+    cmd = [FFMPEG, "-hide_banner", "-loglevel", os.environ.get("MV_FFLOG", "error"), "-nostdin"]
     low = url.lower()
     if "://" not in url:
         cmd += ["-re", "-stream_loop", "-1"]
@@ -61,8 +60,12 @@ def build_cmd(url, mode, audio_port=None, tap_port=None, quality="full"):
         cmd += ["-reconnect", "1", "-reconnect_streamed", "1",
                 "-reconnect_delay_max", "5"]
     vsync = []
-    if mode == "cuda":
-        cmd += ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]
+    if mode == "cuvid":
+        cmd += ["-c:v", "h264_cuvid", "-deint", "adaptive",
+                "-resize", f"{TILE_W}x{TILE_H}"]
+        vf = f"fps={TILE_FPS}"
+    elif mode == "cuda":
+        cmd += ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda","-extra_hw_frames", "4"]
         vf = f"scale_cuda={TILE_W}:{TILE_H},hwdownload,format=nv12,fps={TILE_FPS}"
     else:
         cmd += ["-threads", "1"]          # 20 процесів × багато потоків декодера = зайве перемикання
@@ -75,8 +78,8 @@ def build_cmd(url, mode, audio_port=None, tap_port=None, quality="full"):
             vsync = ["-fps_mode", "passthrough"]    # лише справжні кадри, без дублікатів
         else:
             vf += f",fps={TILE_FPS}"
-    cmd += ["-fflags", "nobuffer", "-analyzeduration", "2000000",
-            "-probesize", "2000000", "-i", _srt_caller(url),
+    cmd += ["-fflags", "nobuffer", "-analyzeduration", "5000000",
+            "-probesize", "5000000", "-i", _srt_caller(url),
             # вихід 1: відео в pipe
             "-map", "0:v:0", "-an", "-sn", "-vf", vf, *vsync,
             "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"]
@@ -84,7 +87,7 @@ def build_cmd(url, mode, audio_port=None, tap_port=None, quality="full"):
         cmd += ["-map", "0:a:0?", "-vn", "-ac", "1", "-ar", str(AUDIO_RATE),
                 "-f", "s16le", f"tcp://127.0.0.1:{audio_port}"]
     if tap_port:                              # вихід 3: копія потоку для лічильника бітрейту
-        cmd += ["-map", "0:v?", "-map", "0:a?", "-c", "copy",
+        cmd += ["-map", "0:v:0", "-c", "copy",
                 "-f", "mpegts", f"tcp://127.0.0.1:{tap_port}"]
     return cmd
 
@@ -145,7 +148,7 @@ class ChannelPipeline:
                 pass
 
     def _run(self):
-        gpu = "cpu" if self.decoder == "cpu" else "cuda"
+        gpu = {"cpu": "cpu" , "cuvid":"cuvid"}.get(self.decoder, "cuda")
         while not self._stop.is_set():
             self._switching = False
             mode = gpu if self.quality == "full" else "cpu"
@@ -156,7 +159,7 @@ class ChannelPipeline:
             if self._switching:           # це зміна якості, а не збій
                 continue
             err = self.last_error or "немає кадрів 8 с"
-            print(f"[{self.url}] {mode}: кадрів {frames}, помилка: {err}")
+            print(f"[{self.url}] {mode}: кадрів {frames}: " + " | ".join(self.err_log[-5:]))
             self.on_status(f"NO_SIGNAL: {err[:70]}")
             if frames == 0:
                 if any("does not contain any stream" in l for l in self.err_log):
@@ -191,12 +194,15 @@ class ChannelPipeline:
                 txt = line.decode(errors="replace").strip()
                 self.last_error = txt
                 self.err_log.append(txt)
+                if os.environ.get("MV_FFLOG"):
+                    print(f"[{self.url}] {txt}")
                 del self.err_log[:-30]
         threading.Thread(target=drain, daemon=True).start()
-
+        got = [False]
         def watchdog():
             while p.poll() is None and not self._stop.is_set():
-                if time.time() - self._last_frame > (15.0 if q == "ligth" else NO_SIGNAL_S):
+                limit = (15.0 if q == "light" else NO_SIGNAL_S) if got[0] else 20.0
+                if time.time() - self._last_frame > limit:
                     _kill_tree(p)
                     return
                 time.sleep(0.5)
@@ -220,15 +226,24 @@ class ChannelPipeline:
         threading.Thread(target=self._bitrate_loop, args=(p,), daemon=True).start()
 
         frames = 0
+        t_fps, n_fps = time.time(), 0
+        last = time.time()
         while True:
             data = p.stdout.read(FRAME_BYTES)
             if len(data) < FRAME_BYTES:
                 break
+            t1 = time.time()
             frames += 1
-            self._last_frame = time.time()
+            self._last_frame = t1
             if frames == 1:
                 self.on_status(f"OK ({mode}/{q})")
             self.on_frame(data)
+            t2 = time.time()
+            if t2 - t1 > 0.05:
+                print(f"[{self.url[-10:]} {mode}/{q}] callback {1000*(t2-t1):.0f} мс")
+            if t1 - last > 0.5:
+                 print(f"[{self.url[-10:]} {mode}/{q}] чекали кадр {t1-last:.2f} с")
+            last = t2
         self._kill()
         return frames
 

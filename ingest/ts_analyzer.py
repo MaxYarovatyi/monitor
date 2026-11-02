@@ -49,7 +49,7 @@ class UdpTsAnalyzer:
         chunks, t0 = [], time.time()
         while not self._stop.is_set():
             try:
-                chunks.append(s.recv(65634))
+                chunks.append(s.recv(65536))
             except socket.timeout:
                 pass
             now = time.time()

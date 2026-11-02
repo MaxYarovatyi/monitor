@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QSizePolicy,
 
 from ingest.pipeline import TILE_H, TILE_W
 from ui.vu import VuMeter
+from ui.video_view import VideoView
+
 
 SHORT = {"no_signal": "NO SIGNAL", "low_bitrate": "БІТРЕЙТ",
          "cc_errors": "CC", "silence": "ТИША","black": "BLACK", "freeze": "FREEZE"}
@@ -39,11 +41,12 @@ class Tile(QFrame):
         self.title.setStyleSheet("font: bold 11pt Consolas;")
         self._render_title()
         
-        self.video = QLabel()
-        self.video.setAlignment(Qt.AlignCenter)
-        self.video.setStyleSheet("background:black;")
-        self.video.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.video.setMinimumSize(80, 45)
+        # self.video = QLabel()
+        # self.video.setAlignment(Qt.AlignCenter)
+        # self.video.setStyleSheet("background:black;")
+        # self.video.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        # self.video.setMinimumSize(80, 45)
+        self.video = VideoView()
         self.vu = VuMeter()
         mid = QHBoxLayout()
         mid.setSpacing(2)
@@ -125,10 +128,11 @@ class Tile(QFrame):
         self._render_alarms()
 
     def _overlay(self, text, color):
-        self.video.clear()
-        self.video.setText(text)
-        self.video.setStyleSheet(
-            f"background:black; color:{color}; font: bold 14pt Consolas;")
+        self.video.set_text(text,color)
+        # self.video.clear()
+        # self.video.setText(text)
+        # self.video.setStyleSheet(
+        #     f"background:black; color:{color}; font: bold 14pt Consolas;")
 
     def _on_status(self, text):
         self.status.setText(text)
@@ -146,10 +150,11 @@ class Tile(QFrame):
         data = self._latest
         if self._down or data is None:
             return
-        img = QImage(data, TILE_W, TILE_H, TILE_W * 3, QImage.Format_RGB888)
-        pix = QPixmap.fromImage(img).scaled(
-            self.video.size(), Qt.KeepAspectRatio, Qt.FastTransformation)
-        self.video.setPixmap(pix)
+        img = QImage(data, TILE_W, TILE_H, TILE_W * 3, QImage.Format_RGB888).copy()
+        # pix = QPixmap.fromImage(img).scaled(
+        #     self.video.size(), Qt.KeepAspectRatio, Qt.FastTransformation)
+        # self.video.setPixmap(pix)
+        self.video.set_frame(img)
 
     def _on_metrics(self, m):
         w = self._worst(("low_bitrate", "cc_errors"))

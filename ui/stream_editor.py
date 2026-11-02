@@ -39,7 +39,7 @@ class StreamEditor(QWidget):
         self.name = QLineEdit()
         self.url = QLineEdit()
         self.dec = QComboBox()
-        self.dec.addItems(["(за замовчуванням)", "auto", "cuda", "cpu"])
+        self.dec.addItems(["(за замовчуванням)", "auto", "cuda", "cpu", "cuvid"])
         self.qual = QComboBox()
         self.qual.addItems(["(default)", "full", "smooth", "light"])
         
