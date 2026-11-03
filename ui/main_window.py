@@ -24,8 +24,9 @@ class MainWindow(QMainWindow):
 
         central = QWidget()
         self.grid = QGridLayout(central)
-        self.grid.setContentsMargins(2, 2, 2, 2)
-        self.grid.setSpacing(2)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setSpacing(1)
+        self._cols, self._ids = 0, []
         self.setCentralWidget(central)
 
         self.alarm_log = AlarmLogWindow(monitor.bus, self)
@@ -63,15 +64,33 @@ class MainWindow(QMainWindow):
             self.tiles[cid].set_name(self.monitor.get_state(cid).name)
         self._relayout()
 
-    def _relayout(self):
+    def _best_cols(self, n):
+        w = max(1, self.centralWidget().width())
+        h = max(1, self.centralWidget().height())
+        best, best_area = 1, 0.0
+        for cols in range(1, n + 1):
+            rows = math.ceil(n / cols)
+            pw = min(w / cols, h / rows * 16 / 9)
+            if pw * pw * 9 / 16 > best_area + 1e-6:
+                best, best_area = cols, pw * pw * 9 / 16
+        return best
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._relayout(force=False)
+
+    def _relayout(self, force=True):
+        ids = [c for c in self.monitor.channel_ids() if c in self.tiles]
+        cols = self._best_cols(len(ids)) if ids else 1
+        if not force and cols == self._cols and ids == self._ids:
+            return
+        self._cols, self._ids = cols, ids
         for t in self.tiles.values():
             self.grid.removeWidget(t)
         for r in range(self.grid.rowCount()):
             self.grid.setRowStretch(r, 0)
         for c in range(self.grid.columnCount()):
             self.grid.setColumnStretch(c, 0)
-        ids = [c for c in self.monitor.channel_ids() if c in self.tiles]
-        cols = min(5, max(1, math.ceil(math.sqrt(len(ids)))))
         for i, cid in enumerate(ids):
             self.grid.addWidget(self.tiles[cid], i // cols, i % cols)
             self.tiles[cid].show()

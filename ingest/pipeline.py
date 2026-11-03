@@ -65,8 +65,15 @@ def build_cmd(url, mode, audio_port=None, tap_port=None, quality="full"):
                 "-resize", f"{TILE_W}x{TILE_H}"]
         vf = f"fps={TILE_FPS}"
     elif mode == "cuda":
-        cmd += ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda","-extra_hw_frames", "4"]
-        vf = f"scale_cuda={TILE_W}:{TILE_H},hwdownload,format=nv12,fps={TILE_FPS}"
+        cmd += ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]
+        if quality == "smooth":
+            cmd += ["-skip_frame", "noref"]
+        elif quality == "light":
+            cmd += ["-skip_frame", "nokey"]
+            vsync = ["-fps_mode", "passthrough"]
+        vf = f"scale_cuda={TILE_W}:{TILE_H},hwdownload,format=nv12"
+        if quality != "light":
+            vf += f",fps={TILE_FPS}"
     else:
         cmd += ["-threads", "1"]          # 20 процесів × багато потоків декодера = зайве перемикання
         if quality == "smooth":
@@ -151,7 +158,7 @@ class ChannelPipeline:
         gpu = {"cpu": "cpu" , "cuvid":"cuvid"}.get(self.decoder, "cuda")
         while not self._stop.is_set():
             self._switching = False
-            mode = gpu if self.quality == "full" else "cpu"
+            mode = gpu
             self.on_status(f"CONNECTING ({mode}/{self.quality})")
             frames = self._session(mode)
             if self._stop.is_set():

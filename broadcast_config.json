@@ -3,75 +3,92 @@
     {
       "name": "Канал 1",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid",
+      "decoder": "cuda",
       "min_kbps": 100,
       "warn_kbps": 2500
     },
     {
       "name": "Канал 2",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid"
+      "decoder": "cuda"
     },
     {
       "name": "Канал 3",
       "url": "http://95.67.12.189:10067",
-      "decoder": "cuvid"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 4",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 5",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 6",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 7",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 8",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 9",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 10",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid",
-      "quality": "full"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 11",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid",
-      "quality": "full"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 12",
       "url": "http://95.67.12.189:9017",
-      "decoder": "cuvid",
-      "quality": "full"
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 13",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 14",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     },
     {
       "name": "Канал 15",
-      "url": "http://95.67.12.189:9017"
+      "url": "http://95.67.12.189:9017",
+      "decoder": "cuda",
+      "quality": "smooth"
     }
   ],
   "defaults": {
