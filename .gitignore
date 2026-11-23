@@ -223,3 +223,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Project-specific
+ffmpeg/
+stats.csv
+*.tmp
+.vscode/
+.idea/
